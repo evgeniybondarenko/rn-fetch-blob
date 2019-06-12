@@ -48,7 +48,7 @@ import java.util.HashMap;
 
 import java.util.concurrent.TimeUnit;
 
-import 	javax.net.ssl.SSLSocketFactory;
+import  javax.net.ssl.SSLSocketFactory;
 
 import okhttp3.Call;
 import okhttp3.ConnectionPool;
@@ -62,7 +62,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.TlsVersion;
-
+import com.facebook.react.modules.network.TLSSocketFactory;
 
 public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
 
@@ -721,19 +721,7 @@ public class RNFetchBlobReq extends BroadcastReceiver implements Runnable {
     public static OkHttpClient.Builder enableTls12OnPreLollipop(OkHttpClient.Builder client) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             try {
-                // Code from https://stackoverflow.com/a/40874952/544779
-                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                trustManagerFactory.init((KeyStore) null);
-                TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-                if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
-                    throw new IllegalStateException("Unexpected default trust managers:" + Arrays.toString(trustManagers));
-                }
-                X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
-                SSLContext sslContext = SSLContext.getInstance("SSL");
-                sslContext.init(null, new TrustManager[] { trustManager }, null);
-                SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-                client.sslSocketFactory(sslSocketFactory, trustManager);
+                client.sslSocketFactory(new TLSSocketFactory());
 
                 ConnectionSpec cs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                         .tlsVersions(TlsVersion.TLS_1_2)
